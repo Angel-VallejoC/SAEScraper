@@ -1,3 +1,4 @@
 .idea
 SAEScraper.iml
-.out
+out
+target
