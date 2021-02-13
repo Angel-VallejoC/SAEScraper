@@ -1,8 +1,10 @@
 package me.angelvc.saes.scraper.models;
 
-import javafx.util.Pair;
+import me.angelvc.saes.scraper.util.Pair;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 public class Kardex {
 
@@ -31,5 +33,16 @@ public class Kardex {
             throw new IllegalArgumentException("Level " + level + " does not exist");
 
         return kardex.get(level);
+    }
+
+    public Set<Integer> getLevels(){
+        return kardex.keySet();
+    }
+
+    @Override
+    public String toString() {
+        return "Kardex{" +
+                "kardex=" + kardex +
+                '}';
     }
 }

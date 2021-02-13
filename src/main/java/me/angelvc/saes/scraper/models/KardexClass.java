@@ -41,4 +41,16 @@ public class KardexClass {
     public String getCalificacion() {
         return calificacion;
     }
+
+    @Override
+    public String toString() {
+        return "KardexClass{" +
+                "clave='" + clave + '\'' +
+                ", materia='" + materia + '\'' +
+                ", fecha='" + fecha + '\'' +
+                ", periodo='" + periodo + '\'' +
+                ", formaEvaluacion='" + formaEvaluacion + '\'' +
+                ", calificacion='" + calificacion + '\'' +
+                '}';
+    }
 }
