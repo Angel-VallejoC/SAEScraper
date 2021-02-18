@@ -1,5 +1,6 @@
 package me.angelvc.saes.scraper;
 
+import me.angelvc.saes.scraper.exceptions.SessionExpiredException;
 import me.angelvc.saes.scraper.models.*;
 import me.angelvc.saes.scraper.util.Pair;
 import org.jsoup.Connection;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 public class SAEScraper {
 
+    private static final String NULL_DOCUMENT_MESSAGE = "El documento no ha sido inicializado";
     private static final String USER_AGENT = "Chrome/81.0.4044.138";
     private static String BASE_URL;
 
@@ -35,6 +37,11 @@ public class SAEScraper {
         if (parser == null)
             parser = new SAEScraper(schoolUrl);
 
+        try {
+            parser.loadLoginPage();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return parser;
     }
 
@@ -62,7 +69,7 @@ public class SAEScraper {
      */
     public byte[] getCaptchaImage() throws IOException {
         if (loginDocument == null)
-            throw new IllegalStateException("No es posible cargar captcha");
+            throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
         Element captcha = loginDocument.selectFirst("#c_default_ctl00_leftcolumn_loginuser_logincaptcha_CaptchaImage");
         if (captcha == null) {
@@ -79,7 +86,12 @@ public class SAEScraper {
         return response.bodyAsBytes();
     }
 
-    public Pair<Boolean, String> login(String user, String password, String captcha) throws IOException {
+    public Pair<Boolean, String> login(String user, String password, String captcha) throws IOException  {
+        if (loginDocument == null)
+            throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
+        if (loginDocument.selectFirst("#ctl00_leftColumn_LogOut") != null){
+            throw new IllegalStateException("El formulario de inicio de sesión no existe");
+        }
         String actionUrl = BASE_URL + "Default.aspx?ReturnUrl=%2falumnos%2fdefault.aspx";
 
         // required parameters to login
@@ -111,8 +123,9 @@ public class SAEScraper {
 
         Element error = loginDocument.selectFirst("#ctl00_leftColumn_LoginUser > tbody > tr > td > span");
 
-        if (error == null) { // there is no error, user is logged in
-//            cookies.clear(); DO NOT CLEAR COOKIES, THEY ARE NEEDED
+        if (error == null) {
+            // there is no error, user is logged in
+            // add new generated cookies
             cookies.putAll(response.cookies());
             return new Pair<>(true, "");
         }
@@ -120,16 +133,9 @@ public class SAEScraper {
         return new Pair<>(false, error.text());
     }
 
-    public boolean isLoggedIn() {
+    public List<ScheduleClass> getStudentSchedule() throws IOException, SessionExpiredException {
         if (loginDocument == null)
-            return false;
-
-        return loginDocument.select("#ctl00_leftColumn_LoginStatusSession").first() != null;
-    }
-
-    public List<ScheduleClass> getStudentSchedule() throws IOException {
-        if (!isLoggedIn())
-            throw new IllegalStateException("User must be logged in to get schedule");
+            throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
         String scheduleUrl = loginDocument.select("#ctl00_subMenun10 > td > table > tbody > tr > td > a")
                 .first().absUrl("href");
@@ -139,6 +145,8 @@ public class SAEScraper {
         List<ScheduleClass> schedule = new ArrayList<>();
 
         Connection.Response response = connection.execute();
+        checkSessionState(scheduleUrl, response.url().toString());
+
         Document scheduleDocument = response.parse();
         Elements scheduleTable = scheduleDocument.select("#ctl00_mainCopy_GV_Horario tr:nth-child(n+2)");
         for (Element classRow : scheduleTable) {
@@ -169,9 +177,9 @@ public class SAEScraper {
         return schedule;
     }
 
-    public StudentInfo getStudentInfo() throws IOException {
-        if (!isLoggedIn())
-            throw new IllegalStateException("User must be logged in to get the student info");
+    public StudentInfo getStudentInfo() throws IOException, SessionExpiredException {
+        if (loginDocument == null)
+            throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
         String kardexUrl = loginDocument
                 .select("#ctl00_subMenun5 > td > table > tbody > tr > td > a")
@@ -181,6 +189,8 @@ public class SAEScraper {
                 .method(Connection.Method.GET).userAgent(USER_AGENT);
 
         Connection.Response response = connection.execute();
+        checkSessionState(kardexUrl, response.url().toString());
+
         Document studentInfoDocument = response.parse();
 
         return new StudentInfo(
@@ -193,9 +203,9 @@ public class SAEScraper {
         );
     }
 
-    public Kardex getKardex() throws IOException {
-        if (!isLoggedIn())
-            throw new IllegalStateException("User must be logged in to get student's kardex");
+    public Kardex getKardex() throws IOException, SessionExpiredException {
+        if (loginDocument == null)
+            throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
         String kardexUrl = loginDocument.select("#ctl00_subMenun5 > td > table > tbody > tr > td > a")
                 .first().absUrl("href");
@@ -204,6 +214,8 @@ public class SAEScraper {
                 .method(Connection.Method.GET).userAgent(USER_AGENT);
 
         Connection.Response response = connection.execute();
+        checkSessionState(kardexUrl, response.url().toString());
+
         Document kardexDocument = response.parse();
         Elements kardexElements = kardexDocument.select("#ctl00_mainCopy_Lbl_Kardex").first().select("center");// .children();
 
@@ -233,9 +245,9 @@ public class SAEScraper {
         return kardex;
     }
 
-    public ArrayList<GradeEntry> getGrades() throws IOException {
-        if (!isLoggedIn())
-            throw new IllegalStateException("User must be logged in to get student's kardex");
+    public ArrayList<GradeEntry> getGrades() throws IOException, SessionExpiredException {
+        if (loginDocument == null)
+            throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
         String gradesUrl = loginDocument.select("#ctl00_subMenun11 > td > table > tbody > tr > td > a")
                 .first().absUrl("href");
@@ -244,6 +256,8 @@ public class SAEScraper {
                 .method(Connection.Method.GET).ignoreHttpErrors(true).userAgent(USER_AGENT);
 
         Connection.Response response = connection.execute();
+        checkSessionState(gradesUrl, response.url().toString());
+
         Document gradesDocument = response.parse();
         Elements gradesElements = gradesDocument.select("#ctl00_mainCopy_GV_Calif > tbody > tr:nth-child(n+2)");
 
@@ -265,6 +279,11 @@ public class SAEScraper {
         }
 
         return gradeEntries;
+    }
+
+    private void checkSessionState(String requestUrl, String responseUrl) throws SessionExpiredException{
+        if (! requestUrl.equals(responseUrl))
+            throw new SessionExpiredException("La sesión ha expirado");
     }
 
     public ArrayList<GradeEntry> getGradesTest() throws IOException {
