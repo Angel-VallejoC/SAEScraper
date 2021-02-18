@@ -95,14 +95,14 @@ public class SAEScraper {
         String actionUrl = BASE_URL + "Default.aspx?ReturnUrl=%2falumnos%2fdefault.aspx";
 
         // required parameters to login
-        String eventTarget = loginDocument.select("#__EVENTTARGET").first().attr("value");
-        String eventArgument = loginDocument.select("#__EVENTARGUMENT").first().attr("value");
-        String viewState = loginDocument.select("#__VIEWSTATE").first().attr("value");
-        String viewStateGenerator = loginDocument.select("#__VIEWSTATEGENERATOR").first().attr("value");
-        String eventValidation = loginDocument.select("#__EVENTVALIDATION").first().attr("value");
-        String lbdVCID = loginDocument.select("#LBD_VCID_c_default_ctl00_leftcolumn_loginuser_logincaptcha").first().attr("value");
-        String lbdWorkaround = loginDocument.select("#LBD_BackWorkaround_c_default_ctl00_leftcolumn_loginuser_logincaptcha").first().attr("value");
-        String loginButton = loginDocument.select("#ctl00_leftColumn_LoginUser_LoginButton").first().attr("value");
+        String eventTarget = loginDocument.selectFirst("#__EVENTTARGET").attr("value");
+        String eventArgument = loginDocument.selectFirst("#__EVENTARGUMENT").attr("value");
+        String viewState = loginDocument.selectFirst("#__VIEWSTATE").attr("value");
+        String viewStateGenerator = loginDocument.selectFirst("#__VIEWSTATEGENERATOR").attr("value");
+        String eventValidation = loginDocument.selectFirst("#__EVENTVALIDATION").attr("value");
+        String lbdVCID = loginDocument.selectFirst("#LBD_VCID_c_default_ctl00_leftcolumn_loginuser_logincaptcha").attr("value");
+        String lbdWorkaround = loginDocument.selectFirst("#LBD_BackWorkaround_c_default_ctl00_leftcolumn_loginuser_logincaptcha").attr("value");
+        String loginButton = loginDocument.selectFirst("#ctl00_leftColumn_LoginUser_LoginButton").attr("value");
 
         Connection connection = Jsoup.connect(actionUrl).cookies(cookies).method(Connection.Method.POST)
                 .userAgent(USER_AGENT)
@@ -137,8 +137,8 @@ public class SAEScraper {
         if (loginDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
-        String scheduleUrl = loginDocument.select("#ctl00_subMenun10 > td > table > tbody > tr > td > a")
-                .first().absUrl("href");
+        String scheduleUrl = loginDocument.selectFirst("#ctl00_subMenun10 > td > table > tbody > tr > td > a")
+                .absUrl("href");
         Connection connection = Jsoup.connect(scheduleUrl).cookies(cookies)
                 .method(Connection.Method.GET).userAgent(USER_AGENT);
 
@@ -153,21 +153,21 @@ public class SAEScraper {
 
             ArrayList<String> classDetails = new ArrayList<>();
             for (int i = 1; i <= 10; i++) {
-                classDetails.add(classRow.select("td:nth-child(" + i + ") font").first().text());
+                classDetails.add(classRow.selectFirst("td:nth-child(" + i + ") font").text());
             }
 
             ScheduleClass scheduleClass = new ScheduleClass(
-                    classRow.select("td:nth-child(1)").first().text(),  // grupo
-                    classRow.select("td:nth-child(3)").first().text(),  // materia
-                    classRow.select("td:nth-child(4)").first().text(),  // profesor
-                    classRow.select("td:nth-child(5)").first().text(),  // edificio
-                    classRow.select("td:nth-child(6)").first().text(),  // salon
+                    classRow.selectFirst("td:nth-child(1)").text(),  // grupo
+                    classRow.selectFirst("td:nth-child(3)").text(),  // materia
+                    classRow.selectFirst("td:nth-child(4)").text(),  // profesor
+                    classRow.selectFirst("td:nth-child(5)").text(),  // edificio
+                    classRow.selectFirst("td:nth-child(6)").text(),  // salon
                     new String[]{
-                            classRow.select("td:nth-child(7)").first().text(), // Lunes
-                            classRow.select("td:nth-child(8)").first().text(), // Martes
-                            classRow.select("td:nth-child(9)").first().text(), // Miércoles
-                            classRow.select("td:nth-child(10)").first().text(), // Jueves
-                            classRow.select("td:nth-child(11)").first().text(), // Viernes
+                            classRow.selectFirst("td:nth-child(7)").text(), // Lunes
+                            classRow.selectFirst("td:nth-child(8)").text(), // Martes
+                            classRow.selectFirst("td:nth-child(9)").text(), // Miércoles
+                            classRow.selectFirst("td:nth-child(10)").text(), // Jueves
+                            classRow.selectFirst("td:nth-child(11)").text(), // Viernes
                     }  // horario
             );
 
@@ -182,8 +182,7 @@ public class SAEScraper {
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
         String kardexUrl = loginDocument
-                .select("#ctl00_subMenun5 > td > table > tbody > tr > td > a")
-                .first().absUrl("href");
+                .selectFirst("#ctl00_subMenun5 > td > table > tbody > tr > td > a").absUrl("href");
 
         Connection connection = Jsoup.connect(kardexUrl).cookies(cookies)
                 .method(Connection.Method.GET).userAgent(USER_AGENT);
@@ -207,8 +206,8 @@ public class SAEScraper {
         if (loginDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
-        String kardexUrl = loginDocument.select("#ctl00_subMenun5 > td > table > tbody > tr > td > a")
-                .first().absUrl("href");
+        String kardexUrl = loginDocument.selectFirst("#ctl00_subMenun5 > td > table > tbody > tr > td > a")
+                .absUrl("href");
 
         Connection connection = Jsoup.connect(kardexUrl).cookies(cookies)
                 .method(Connection.Method.GET).userAgent(USER_AGENT);
@@ -217,25 +216,25 @@ public class SAEScraper {
         checkSessionState(kardexUrl, response.url().toString());
 
         Document kardexDocument = response.parse();
-        Elements kardexElements = kardexDocument.select("#ctl00_mainCopy_Lbl_Kardex").first().select("center");// .children();
+        Elements kardexElements = kardexDocument.selectFirst("#ctl00_mainCopy_Lbl_Kardex").select("center");// .children();
 
         Kardex kardex = new Kardex();
 
         int levelCount = 1;
         for (Element kardexElement : kardexElements) {
-            String levelName = kardexElement.select("table > tbody > tr:nth-child(1) > td").first().ownText();
+            String levelName = kardexElement.selectFirst("table > tbody > tr:nth-child(1) > td").ownText();
             Elements classesTable = kardexElement.select("table > tbody > tr:nth-child(n+3)");
 
             for (Element classEntry : classesTable) {
-                String subject = classEntry.select("td:nth-child(2)").first().ownText().toLowerCase(); // materia
+                String subject = classEntry.selectFirst("td:nth-child(2)").ownText().toLowerCase(); // materia
                 subject = subject.substring(0, 1).toUpperCase() + subject.substring(1);
                 kardex.addClass(levelCount, levelName, new KardexClass(
-                        classEntry.select("td:nth-child(1)").first().ownText(), // clave
+                        classEntry.selectFirst("td:nth-child(1)").ownText(), // clave
                         subject,
-                        classEntry.select("td:nth-child(3)").first().ownText(), // fecha
-                        classEntry.select("td:nth-child(4)").first().ownText(), // periodo
-                        classEntry.select("td:nth-child(5)").first().ownText(), // formaEvaluación
-                        classEntry.select("td:nth-child(6)").first().ownText() // calificacion
+                        classEntry.selectFirst("td:nth-child(3)").ownText(), // fecha
+                        classEntry.selectFirst("td:nth-child(4)").ownText(), // periodo
+                        classEntry.selectFirst("td:nth-child(5)").ownText(), // formaEvaluación
+                        classEntry.selectFirst("td:nth-child(6)").ownText() // calificacion
                 ));
 
             }
@@ -249,8 +248,8 @@ public class SAEScraper {
         if (loginDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
-        String gradesUrl = loginDocument.select("#ctl00_subMenun11 > td > table > tbody > tr > td > a")
-                .first().absUrl("href");
+        String gradesUrl = loginDocument.selectFirst("#ctl00_subMenun11 > td > table > tbody > tr > td > a")
+                .absUrl("href");
 
         Connection connection = Jsoup.connect(gradesUrl).cookies(cookies)
                 .method(Connection.Method.GET).ignoreHttpErrors(true).userAgent(USER_AGENT);
