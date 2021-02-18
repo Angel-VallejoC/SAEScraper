@@ -38,27 +38,43 @@ public class SAEScraper {
         return parser;
     }
 
-    public byte[] loadLoginPage() throws IOException {
-        // Load the initial page for getting the required cookies
+    /**
+     * Carga página inicial del SAES.
+     * Al llamar a este metodo se limpian las cookies almacenadas previamente.
+     * @throws IOException Si existe un error de conexión
+     */
+    public void loadLoginPage() throws IOException {
         Connection connection = Jsoup.connect(BASE_URL).method(Connection.Method.GET);
         Connection.Response response = connection.execute();
         loginDocument = response.parse();
 
-        Element captcha = loginDocument.select("#c_default_ctl00_leftcolumn_loginuser_logincaptcha_CaptchaImage").first();
+        // delete previous stored cookies and save the cookies from the new response
+        cookies.clear();
+        cookies.putAll(response.cookies());
+    }
+
+    /**
+     * Obtiene la imagen captcha necesaria para iniciar sesión
+     * @return Arreglo de bytes de la imagen
+     * @throws IllegalStateException Si no se ha cargado la página de inicio de sesión
+     * o no es posible encontrar la imagen
+     * @throws IOException Si existe un error de conexión
+     */
+    public byte[] getCaptchaImage() throws IOException {
+        if (loginDocument == null)
+            throw new IllegalStateException("No es posible cargar captcha");
+
+        Element captcha = loginDocument.selectFirst("#c_default_ctl00_leftcolumn_loginuser_logincaptcha_CaptchaImage");
         if (captcha == null) {
-            throw new RuntimeException("Unable to find captcha...");
+            throw new IllegalStateException("No se pudo encontrar el captcha");
         }
 
-        // store cookies
-        cookies.putAll(response.cookies());
-
         // Fetch the captcha image
-        response = Jsoup
+        Connection.Response response = Jsoup
                 .connect(captcha.absUrl("src")) // Extract image absolute URL
                 .cookies(cookies) // Grab cookies
                 .ignoreContentType(true) // Needed for fetching image
                 .execute();
-
 
         return response.bodyAsBytes();
     }
@@ -125,7 +141,6 @@ public class SAEScraper {
         Connection.Response response = connection.execute();
         Document scheduleDocument = response.parse();
         Elements scheduleTable = scheduleDocument.select("#ctl00_mainCopy_GV_Horario tr:nth-child(n+2)");
-        System.out.println(scheduleDocument);
         for (Element classRow : scheduleTable) {
 
             ArrayList<String> classDetails = new ArrayList<>();
