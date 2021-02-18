@@ -266,15 +266,19 @@ public class SAEScraper {
         ArrayList<GradeEntry> gradeEntries = new ArrayList<>();
 
         for (Element grade: gradesElements){
+            String subject = grade.select("td:nth-child(2)").first().text().toLowerCase();  // materia
+            subject = subject.substring(0, 1).toUpperCase() + subject.substring(1);
             gradeEntries.add(new GradeEntry(
-                    gradesElements.select("td:nth-child(1)").first().text(),  // grupo
-                    gradesElements.select("td:nth-child(2)").first().text(),  // materia
-                    gradesElements.select("td:nth-child(3)").first().text(),  // primer parcial
-                    gradesElements.select("td:nth-child(4)").first().text(),  // segundo parcial
-                    gradesElements.select("td:nth-child(5)").first().text(),  // tercer parcial
-                    gradesElements.select("td:nth-child(5)").first().text(),  // extra
-                    gradesElements.select("td:nth-child(5)").first().text()   // final
+                    grade.select("td:nth-child(1)").first().text(),  // grupo
+                    subject,
+                    grade.select("td:nth-child(3)").first().text(),  // primer parcial
+                    grade.select("td:nth-child(4)").first().text(),  // segundo parcial
+                    grade.select("td:nth-child(5)").first().text(),  // tercer parcial
+                    grade.select("td:nth-child(5)").first().text(),  // extra
+                    grade.select("td:nth-child(5)").first().text()   // final
             ));
+
+            return gradeEntries;
         }
 
         return gradeEntries;
