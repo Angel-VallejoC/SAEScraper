@@ -23,13 +23,13 @@ public class SAEScraper {
     private static String BASE_URL;
 
     private static Map<String, String> cookies;
-    private static Document loginDocument;  // stores login page and home page once the user is logged in
+    private static Document workingDocument;  // stores login page and home page once the user is logged in
 
-    private static SAEScraper parser;
+    private static SAEScraper scraper;
 
     private SAEScraper(SAESchoolsUrls.School schoolUrl) {
         cookies = new HashMap<>();
-        loginDocument = null;
+        workingDocument = null;
         BASE_URL = SAESchoolsUrls.getSchoolUrl(schoolUrl);
     }
 
@@ -39,15 +39,15 @@ public class SAEScraper {
      * @return Instancia del scraper
      */
     public static SAEScraper getInstance(SAESchoolsUrls.School schoolUrl) {
-        if (parser == null)
-            parser = new SAEScraper(schoolUrl);
+        if (scraper == null)
+            scraper = new SAEScraper(schoolUrl);
 
         try {
-            parser.loadLoginPage();
+            scraper.loadLoginPage();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return parser;
+        return scraper;
     }
 
     /**
@@ -58,7 +58,7 @@ public class SAEScraper {
     public void loadLoginPage() throws IOException {
         Connection connection = Jsoup.connect(BASE_URL).method(Connection.Method.GET);
         Connection.Response response = connection.execute();
-        loginDocument = response.parse();
+        workingDocument = response.parse();
 
         // delete previous stored cookies and save the cookies from the new response
         cookies.clear();
@@ -73,10 +73,10 @@ public class SAEScraper {
      * @throws IOException Si existe un error de conexión
      */
     public byte[] getCaptchaImage() throws IOException {
-        if (loginDocument == null)
+        if (workingDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
-        Element captcha = loginDocument.selectFirst("#c_default_ctl00_leftcolumn_loginuser_logincaptcha_CaptchaImage");
+        Element captcha = workingDocument.selectFirst("#c_default_ctl00_leftcolumn_loginuser_logincaptcha_CaptchaImage");
         if (captcha == null) {
             throw new IllegalStateException("No se pudo encontrar el captcha");
         }
@@ -102,22 +102,22 @@ public class SAEScraper {
      * @throws IOException Si existe un error de conexión
      */
     public Pair<Boolean, String> login(String user, String password, String captcha) throws IOException  {
-        if (loginDocument == null)
+        if (workingDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
-        if (loginDocument.selectFirst("#ctl00_leftColumn_LogOut") != null){
+        if (workingDocument.selectFirst("#ctl00_leftColumn_LogOut") != null){
             throw new IllegalStateException("El formulario de inicio de sesión no existe");
         }
         String actionUrl = BASE_URL + "Default.aspx?ReturnUrl=%2falumnos%2fdefault.aspx";
 
         // required parameters to login
-        String eventTarget = loginDocument.selectFirst("#__EVENTTARGET").attr("value");
-        String eventArgument = loginDocument.selectFirst("#__EVENTARGUMENT").attr("value");
-        String viewState = loginDocument.selectFirst("#__VIEWSTATE").attr("value");
-        String viewStateGenerator = loginDocument.selectFirst("#__VIEWSTATEGENERATOR").attr("value");
-        String eventValidation = loginDocument.selectFirst("#__EVENTVALIDATION").attr("value");
-        String lbdVCID = loginDocument.selectFirst("#LBD_VCID_c_default_ctl00_leftcolumn_loginuser_logincaptcha").attr("value");
-        String lbdWorkaround = loginDocument.selectFirst("#LBD_BackWorkaround_c_default_ctl00_leftcolumn_loginuser_logincaptcha").attr("value");
-        String loginButton = loginDocument.selectFirst("#ctl00_leftColumn_LoginUser_LoginButton").attr("value");
+        String eventTarget = workingDocument.selectFirst("#__EVENTTARGET").attr("value");
+        String eventArgument = workingDocument.selectFirst("#__EVENTARGUMENT").attr("value");
+        String viewState = workingDocument.selectFirst("#__VIEWSTATE").attr("value");
+        String viewStateGenerator = workingDocument.selectFirst("#__VIEWSTATEGENERATOR").attr("value");
+        String eventValidation = workingDocument.selectFirst("#__EVENTVALIDATION").attr("value");
+        String lbdVCID = workingDocument.selectFirst("#LBD_VCID_c_default_ctl00_leftcolumn_loginuser_logincaptcha").attr("value");
+        String lbdWorkaround = workingDocument.selectFirst("#LBD_BackWorkaround_c_default_ctl00_leftcolumn_loginuser_logincaptcha").attr("value");
+        String loginButton = workingDocument.selectFirst("#ctl00_leftColumn_LoginUser_LoginButton").attr("value");
 
         Connection connection = Jsoup.connect(actionUrl).cookies(cookies).method(Connection.Method.POST)
                 .userAgent(USER_AGENT)
@@ -134,9 +134,9 @@ public class SAEScraper {
                 .data("ctl00$leftColumn$LoginUser$LoginButton", loginButton);
 
         Connection.Response response = connection.execute();
-        loginDocument = response.parse();
+        workingDocument = response.parse();
 
-        Element error = loginDocument.selectFirst("#ctl00_leftColumn_LoginUser > tbody > tr > td > span");
+        Element error = workingDocument.selectFirst("#ctl00_leftColumn_LoginUser > tbody > tr > td > span");
 
         if (error == null) {
             // there is no error, user is logged in
@@ -155,10 +155,10 @@ public class SAEScraper {
      * @throws SessionExpiredException Si la sesión expiró
      */
     public List<ScheduleClass> getStudentSchedule() throws IOException, SessionExpiredException {
-        if (loginDocument == null)
+        if (workingDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
-        String scheduleUrl = loginDocument.selectFirst("#ctl00_subMenun10 > td > table > tbody > tr > td > a")
+        String scheduleUrl = workingDocument.selectFirst("#ctl00_subMenun10 > td > table > tbody > tr > td > a")
                 .absUrl("href");
         Connection connection = Jsoup.connect(scheduleUrl).cookies(cookies)
                 .method(Connection.Method.GET).userAgent(USER_AGENT);
@@ -205,10 +205,10 @@ public class SAEScraper {
      * @throws SessionExpiredException Si la sesión expiró
      */
     public StudentInfo getStudentInfo() throws IOException, SessionExpiredException {
-        if (loginDocument == null)
+        if (workingDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
-        String kardexUrl = loginDocument
+        String kardexUrl = workingDocument
                 .selectFirst("#ctl00_subMenun5 > td > table > tbody > tr > td > a").absUrl("href");
 
         Connection connection = Jsoup.connect(kardexUrl).cookies(cookies)
@@ -236,10 +236,10 @@ public class SAEScraper {
      * @throws SessionExpiredException Si la sesión expiró
      */
     public Kardex getKardex() throws IOException, SessionExpiredException {
-        if (loginDocument == null)
+        if (workingDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
-        String kardexUrl = loginDocument.selectFirst("#ctl00_subMenun5 > td > table > tbody > tr > td > a")
+        String kardexUrl = workingDocument.selectFirst("#ctl00_subMenun5 > td > table > tbody > tr > td > a")
                 .absUrl("href");
 
         Connection connection = Jsoup.connect(kardexUrl).cookies(cookies)
@@ -284,10 +284,10 @@ public class SAEScraper {
      * @throws SessionExpiredException Si la sesión expiró
      */
     public ArrayList<GradeEntry> getGrades() throws IOException, SessionExpiredException {
-        if (loginDocument == null)
+        if (workingDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
-        String gradesUrl = loginDocument.selectFirst("#ctl00_subMenun11 > td > table > tbody > tr > td > a")
+        String gradesUrl = workingDocument.selectFirst("#ctl00_subMenun11 > td > table > tbody > tr > td > a")
                 .absUrl("href");
 
         Connection connection = Jsoup.connect(gradesUrl).cookies(cookies)
