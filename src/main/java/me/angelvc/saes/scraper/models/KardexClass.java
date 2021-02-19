@@ -2,55 +2,55 @@ package me.angelvc.saes.scraper.models;
 
 public class KardexClass {
 
-    private String clave;
-    private String materia;
-    private String fecha;
-    private String periodo;
-    private String formaEvaluacion;
-    private String calificacion;
+    private final String code;
+    private final String name;
+    private final String date;
+    private final String term;
+    private final String evaluationType;
+    private final String grade;
 
-    public KardexClass(String clave, String materia, String fecha, String periodo, String formaEvaluacion, String calificacion) {
-        this.clave = clave;
-        this.materia = materia;
-        this.fecha = fecha;
-        this.periodo = periodo;
-        this.formaEvaluacion = formaEvaluacion;
-        this.calificacion = calificacion;
+    public KardexClass(String code, String name, String date, String term, String evaluationType, String grade) {
+        this.code = code;
+        this.name = name;
+        this.date = date;
+        this.term = term;
+        this.evaluationType = evaluationType;
+        this.grade = grade;
     }
 
-    public String getClave() {
-        return clave;
+    public String getCode() {
+        return code;
     }
 
-    public String getMateria() {
-        return materia;
+    public String getName() {
+        return name;
     }
 
-    public String getFecha() {
-        return fecha;
+    public String getDate() {
+        return date;
     }
 
-    public String getPeriodo() {
-        return periodo;
+    public String getTerm() {
+        return term;
     }
 
-    public String getFormaEvaluacion() {
-        return formaEvaluacion;
+    public String getEvaluationType() {
+        return evaluationType;
     }
 
-    public String getCalificacion() {
-        return calificacion;
+    public String getGrade() {
+        return grade;
     }
 
     @Override
     public String toString() {
         return "KardexClass{" +
-                "clave='" + clave + '\'' +
-                ", materia='" + materia + '\'' +
-                ", fecha='" + fecha + '\'' +
-                ", periodo='" + periodo + '\'' +
-                ", formaEvaluacion='" + formaEvaluacion + '\'' +
-                ", calificacion='" + calificacion + '\'' +
+                "code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", date='" + date + '\'' +
+                ", term='" + term + '\'' +
+                ", evaluationType='" + evaluationType + '\'' +
+                ", grade='" + grade + '\'' +
                 '}';
     }
 }

@@ -240,19 +240,18 @@ public class SAEScraper {
         checkSessionState(kardexUrl, response.url().toString());
 
         Document kardexDocument = response.parse();
-        Elements kardexElements = kardexDocument.selectFirst("#ctl00_mainCopy_Lbl_Kardex").select("center");// .children();
+        Elements kardexElements = kardexDocument.selectFirst("#ctl00_mainCopy_Lbl_Kardex").select("center");
 
         Kardex kardex = new Kardex();
 
         int levelCount = 1;
         for (Element kardexElement : kardexElements) {
-            String levelName = kardexElement.selectFirst("table > tbody > tr:nth-child(1) > td").ownText();
             Elements classesTable = kardexElement.select("table > tbody > tr:nth-child(n+3)");
 
             for (Element classEntry : classesTable) {
                 String subject = classEntry.selectFirst("td:nth-child(2)").ownText().toLowerCase(); // materia
                 subject = subject.substring(0, 1).toUpperCase() + subject.substring(1);
-                kardex.addClass(levelCount, levelName, new KardexClass(
+                kardex.addClass(levelCount, new KardexClass(
                         classEntry.selectFirst("td:nth-child(1)").ownText(), // clave
                         subject,
                         classEntry.selectFirst("td:nth-child(3)").ownText(), // fecha
