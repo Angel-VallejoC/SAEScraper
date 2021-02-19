@@ -2,55 +2,55 @@ package me.angelvc.saes.scraper.models;
 
 public class StudentInfo {
 
-    private String unidad;
-    private String boleta;
-    private String nombre;
-    private String carrera;
-    private String plan;
-    private String promedio;
+    private final String campus;
+    private final String id;
+    private final String name;
+    private final String degreeName;
+    private final String plan;
+    private final String average;
 
-    public StudentInfo(String unidad, String boleta, String nombre, String carrera, String plan, String promedio) {
-        this.unidad = unidad;
-        this.boleta = boleta;
-        this.nombre = nombre;
-        this.carrera = carrera;
+    public StudentInfo(String campus, String id, String name, String degreeName, String plan, String average) {
+        this.campus = campus;
+        this.id = id;
+        this.name = name;
+        this.degreeName = degreeName;
         this.plan = plan;
-        this.promedio = promedio;
+        this.average = average;
     }
 
-    public String getUnidad() {
-        return unidad;
+    public String getCampus() {
+        return campus;
     }
 
-    public String getBoleta() {
-        return boleta;
+    public String getId() {
+        return id;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getName() {
+        return name;
     }
 
-    public String getCarrera() {
-        return carrera;
+    public String getDegreeName() {
+        return degreeName;
     }
 
     public String getPlan() {
         return plan;
     }
 
-    public String getPromedio() {
-        return promedio;
+    public String getAverage() {
+        return average;
     }
 
     @Override
     public String toString() {
         return "StudentInfo{" +
-                "unidad='" + unidad + '\'' +
-                ", boleta='" + boleta + '\'' +
-                ", nombre='" + nombre + '\'' +
-                ", carrera='" + carrera + '\'' +
+                "campus='" + campus + '\'' +
+                ", id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", degreeName='" + degreeName + '\'' +
                 ", plan='" + plan + '\'' +
-                ", promedio='" + promedio + '\'' +
+                ", average='" + average + '\'' +
                 '}';
     }
 }

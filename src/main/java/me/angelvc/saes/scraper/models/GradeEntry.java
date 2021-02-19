@@ -2,56 +2,56 @@ package me.angelvc.saes.scraper.models;
 
 public class GradeEntry {
 
-    private String grupo, materia, primero, segundo, tercero, extra, calFinal;
+    private final String code, className, first, second, third, extra, finalGrade;
 
-    public GradeEntry(String grupo, String materia, String primero, String segundo, String tercero, String extra, String calFinal) {
-        this.grupo = grupo;
-        this.materia = materia;
-        this.primero = primero;
-        this.segundo = segundo;
-        this.tercero = tercero;
+    public GradeEntry(String code, String className, String first, String second, String third, String extra, String finalGrade) {
+        this.code = code;
+        this.className = className;
+        this.first = first;
+        this.second = second;
+        this.third = third;
         this.extra = extra;
-        this.calFinal = calFinal;
+        this.finalGrade = finalGrade;
     }
 
-    public String getGrupo() {
-        return grupo == null ? "-" : grupo;
+    public String getCode() {
+        return code == null ? "-" : code;
     }
 
-    public String getMateria() {
-        return materia == null ? "-" : materia;
+    public String getClassName() {
+        return className == null ? "-" : className;
     }
 
-    public String getPrimero() {
-        return primero == null ? "-" : primero;
+    public String getFirst() {
+        return first == null ? "-" : first;
     }
 
-    public String getSegundo() {
-        return segundo == null ? "-" : segundo;
+    public String getSecond() {
+        return second == null ? "-" : second;
     }
 
-    public String getTercero() {
-        return tercero == null ? "-" : tercero;
+    public String getThird() {
+        return third == null ? "-" : third;
     }
 
     public String getExtra() {
         return extra == null ? "-" : extra;
     }
 
-    public String getCalFinal() {
-        return calFinal == null ? "-" : calFinal;
+    public String getFinalGrade() {
+        return finalGrade == null ? "-" : finalGrade;
     }
 
     @Override
     public String toString() {
         return "GradeEntry{" +
-                "grupo='" + grupo + '\'' +
-                ", materia='" + materia + '\'' +
-                ", primero='" + primero + '\'' +
-                ", segundo='" + segundo + '\'' +
-                ", tercero='" + tercero + '\'' +
+                "code='" + code + '\'' +
+                ", className='" + className + '\'' +
+                ", first='" + first + '\'' +
+                ", second='" + second + '\'' +
+                ", third='" + third + '\'' +
                 ", extra='" + extra + '\'' +
-                ", calFinal='" + calFinal + '\'' +
+                ", finalGrade='" + finalGrade + '\'' +
                 '}';
     }
 }
