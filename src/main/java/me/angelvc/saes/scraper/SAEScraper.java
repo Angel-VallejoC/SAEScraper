@@ -163,21 +163,14 @@ public class SAEScraper {
         Connection connection = Jsoup.connect(scheduleUrl).cookies(cookies)
                 .method(Connection.Method.GET).userAgent(USER_AGENT);
 
-        List<ScheduleClass> schedule = new ArrayList<>();
-
         Connection.Response response = connection.execute();
         checkSessionState(scheduleUrl, response.url().toString());
 
         Document scheduleDocument = response.parse();
         Elements scheduleTable = scheduleDocument.select("#ctl00_mainCopy_GV_Horario tr:nth-child(n+2)");
+        List<ScheduleClass> schedule = new ArrayList<>();
         for (Element classRow : scheduleTable) {
-
-            ArrayList<String> classDetails = new ArrayList<>();
-            for (int i = 1; i <= 10; i++) {
-                classDetails.add(classRow.selectFirst("td:nth-child(" + i + ") font").text());
-            }
-
-            ScheduleClass scheduleClass = new ScheduleClass(
+            schedule.add( new ScheduleClass(
                     classRow.selectFirst("td:nth-child(1)").text(),  // grupo
                     classRow.selectFirst("td:nth-child(3)").text(),  // materia
                     classRow.selectFirst("td:nth-child(4)").text(),  // profesor
@@ -190,9 +183,7 @@ public class SAEScraper {
                             classRow.selectFirst("td:nth-child(10)").text(), // Jueves
                             classRow.selectFirst("td:nth-child(11)").text(), // Viernes
                     }  // horario
-            );
-
-            schedule.add(scheduleClass);
+            ));
         }
 
         return schedule;
