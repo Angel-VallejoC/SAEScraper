@@ -33,6 +33,11 @@ public class SAEScraper {
         BASE_URL = SAESchoolsUrls.getSchoolUrl(schoolUrl);
     }
 
+    /**
+     * Obtiene la instancia del scraper
+     * @param schoolUrl Escuela a la que pertenece el alumno
+     * @return Instancia del scraper
+     */
     public static SAEScraper getInstance(SAESchoolsUrls.School schoolUrl) {
         if (parser == null)
             parser = new SAEScraper(schoolUrl);
@@ -86,6 +91,16 @@ public class SAEScraper {
         return response.bodyAsBytes();
     }
 
+    /**
+     * Realiza el inicio de sesión en SAES
+     * @param user Usuario/boleta del alumno
+     * @param password Constraseña del alumno
+     * @param captcha Texto que se muestra en la imagen captcha
+     * @return Un objeto {@link me.angelvc.saes.scraper.util.Pair}.
+     * Key = true si el login fue exitoso, de lo contrario, false
+     * Value contiene el mensaje de error si key = false
+     * @throws IOException Si existe un error de conexión
+     */
     public Pair<Boolean, String> login(String user, String password, String captcha) throws IOException  {
         if (loginDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
@@ -133,6 +148,12 @@ public class SAEScraper {
         return new Pair<>(false, error.text());
     }
 
+    /**
+     * Obtiene el horario del alumno
+     * @return Lista de {@link me.angelvc.saes.scraper.models.ScheduleClass}
+     * @throws IOException Si existe un error de conexión
+     * @throws SessionExpiredException Si la sesión expiró
+     */
     public List<ScheduleClass> getStudentSchedule() throws IOException, SessionExpiredException {
         if (loginDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
@@ -177,6 +198,12 @@ public class SAEScraper {
         return schedule;
     }
 
+    /**
+     * Obtiene la información general del alumno
+     * @return Un objeto {@link me.angelvc.saes.scraper.models.StudentInfo}
+     * @throws IOException Si existe un error de conexión
+     * @throws SessionExpiredException Si la sesión expiró
+     */
     public StudentInfo getStudentInfo() throws IOException, SessionExpiredException {
         if (loginDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
@@ -202,6 +229,12 @@ public class SAEScraper {
         );
     }
 
+    /**
+     * Obtiene las calificaciones del kardex
+     * @return Un objeto {@link me.angelvc.saes.scraper.models.Kardex} con las calificaciones
+     * @throws IOException Si existe un error de conexión
+     * @throws SessionExpiredException Si la sesión expiró
+     */
     public Kardex getKardex() throws IOException, SessionExpiredException {
         if (loginDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
@@ -244,6 +277,12 @@ public class SAEScraper {
         return kardex;
     }
 
+    /**
+     * Obtiene las calificaciones del semestre actual
+     * @return Lista de {@link me.angelvc.saes.scraper.models.GradeEntry}
+     * @throws IOException Si existe un error de conexión
+     * @throws SessionExpiredException Si la sesión expiró
+     */
     public ArrayList<GradeEntry> getGrades() throws IOException, SessionExpiredException {
         if (loginDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
@@ -284,6 +323,13 @@ public class SAEScraper {
         return gradeEntries;
     }
 
+    /**
+     * Verifica si la URL de la petición es la misma que se regresa en la respuesta.
+     * Si no son iguales significa que la sesión expiró.
+     * @param requestUrl String de la URL de la petición
+     * @param responseUrl String de la URL de la respuesta
+     * @throws SessionExpiredException si las URL's son diferentes
+     */
     private void checkSessionState(String requestUrl, String responseUrl) throws SessionExpiredException{
         if (! requestUrl.equals(responseUrl))
             throw new SessionExpiredException("La sesión ha expirado");
