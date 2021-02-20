@@ -41,21 +41,16 @@ public class SAEScraper {
     public static SAEScraper getInstance(SAESchoolsUrls.School schoolUrl) {
         if (scraper == null)
             scraper = new SAEScraper(schoolUrl);
-
-        try {
-            scraper.loadLoginPage();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         return scraper;
     }
 
     /**
-     * Carga página inicial del SAES.
+     * Carga página inicial del SAES y obtiene la imagen captcha necesaria para iniciar sesión.
      * Al llamar a este metodo se limpian las cookies almacenadas previamente.
+     * @return Arreglo de bytes de la imagen captcha
      * @throws IOException Si existe un error de conexión
      */
-    public void loadLoginPage() throws IOException {
+    public byte[] loadLoginPage() throws IOException {
         Connection connection = Jsoup.connect(BASE_URL).method(Connection.Method.GET);
         Connection.Response response = connection.execute();
         workingDocument = response.parse();
@@ -63,18 +58,6 @@ public class SAEScraper {
         // delete previous stored cookies and save the cookies from the new response
         cookies.clear();
         cookies.putAll(response.cookies());
-    }
-
-    /**
-     * Obtiene la imagen captcha necesaria para iniciar sesión
-     * @return Arreglo de bytes de la imagen
-     * @throws IllegalStateException Si no se ha cargado la página de inicio de sesión
-     * o no es posible encontrar la imagen
-     * @throws IOException Si existe un error de conexión
-     */
-    public byte[] getCaptchaImage() throws IOException {
-        if (workingDocument == null)
-            throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
         Element captcha = workingDocument.selectFirst("#c_default_ctl00_leftcolumn_loginuser_logincaptcha_CaptchaImage");
         if (captcha == null) {
@@ -82,7 +65,7 @@ public class SAEScraper {
         }
 
         // Fetch the captcha image
-        Connection.Response response = Jsoup
+        response = Jsoup
                 .connect(captcha.absUrl("src")) // Extract image absolute URL
                 .cookies(cookies) // Grab cookies
                 .ignoreContentType(true) // Needed for fetching image
