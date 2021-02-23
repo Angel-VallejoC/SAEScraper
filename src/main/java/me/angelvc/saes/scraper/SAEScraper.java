@@ -27,20 +27,30 @@ public class SAEScraper {
 
     private static SAEScraper scraper;
 
-    private SAEScraper(SAESchoolsUrls.School schoolUrl) {
+    private SAEScraper(String schoolUrl) {
         cookies = new HashMap<>();
         workingDocument = null;
-        BASE_URL = SAESchoolsUrls.getSchoolUrl(schoolUrl);
+        BASE_URL = schoolUrl;
     }
 
     /**
      * Obtiene la instancia del scraper
-     * @param schoolUrl Escuela a la que pertenece el alumno
+     * @param school Escuela de la que se desea obtener la información
      * @return Instancia del scraper
      */
-    public static SAEScraper getInstance(SAESchoolsUrls.School schoolUrl) {
+    public static SAEScraper getInstance(School school) {
+        if (school == null)
+            throw new IllegalArgumentException("El parámetro school no puede ser null");
+
         if (scraper == null)
-            scraper = new SAEScraper(schoolUrl);
+            scraper = new SAEScraper(school.url);
+
+        if (!school.url.equals(BASE_URL)){
+            cookies.clear();
+            workingDocument = null;
+            BASE_URL = school.url;
+        }
+
         return scraper;
     }
 

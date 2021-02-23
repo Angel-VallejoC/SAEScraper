@@ -8,7 +8,7 @@ Instituto Politécnico Nacional.
 
 ### Obtener instancia del scraper
 ```java
-SAEScraper scraper = SAEScraper.getInstance(SAESchoolsUrls.School.UPIICSA); // se reemplaza con la escuela deseada
+SAEScraper scraper = SAEScraper.getInstance(School.UPIICSA); // se reemplaza con la escuela deseada
 ```
 
 ### Inicio de sesión
