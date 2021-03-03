@@ -10,20 +10,23 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
-public class SAEScraper {
+public class SAEScraper implements Serializable {
 
     private static final String NULL_DOCUMENT_MESSAGE = "El documento no ha sido inicializado";
     private static final String USER_AGENT = "Chrome/81.0.4044.138";
-    private static String BASE_URL;
 
-    private static Map<String, String> cookies;
-    private static Document workingDocument;  // stores login page and home page once the user is logged in
+    private String BASE_URL;
+    private Map<String, String> cookies;
+    private Document workingDocument;  // stores login page and home page once the user is logged in
 
     private static SAEScraper scraper;
 
@@ -45,13 +48,32 @@ public class SAEScraper {
         if (scraper == null)
             scraper = new SAEScraper(school.url);
 
-        if (!school.url.equals(BASE_URL)){
-            cookies.clear();
-            workingDocument = null;
-            BASE_URL = school.url;
+        if (!school.url.equals(scraper.BASE_URL)){
+            scraper.cookies.clear();
+            scraper.workingDocument = null;
+            scraper.BASE_URL = school.url;
         }
 
         return scraper;
+    }
+
+    /**
+     * Recarga el documento de trabajo con las cookies almacenadas
+     * @throws IOException Si existe un error en la conexión
+     * @throws SessionExpiredException Si la sesión expiró
+     */
+    public void reload() throws IOException, SessionExpiredException {
+        // mainUrl, available for logged in users
+        String mainUrl = BASE_URL + "alumnos/default.aspx";
+        Connection connection = Jsoup.connect(mainUrl)
+                .cookies(cookies)
+                .method(Connection.Method.GET)
+                .userAgent(USER_AGENT)
+                .timeout(10 * 1000);
+        Connection.Response response = connection.execute();
+        workingDocument = response.parse();
+
+        checkSessionState(mainUrl, response.url().toString());
     }
 
     /**
@@ -316,6 +338,18 @@ public class SAEScraper {
     private void checkSessionState(String requestUrl, String responseUrl) throws SessionExpiredException{
         if (! requestUrl.equals(responseUrl))
             throw new SessionExpiredException("La sesión ha expirado");
+    }
+
+    private void readObject(ObjectInputStream inputStream) throws ClassNotFoundException, IOException {
+        BASE_URL = inputStream.readUTF();
+        cookies = (Map<String, String>) inputStream.readObject();
+        workingDocument = Jsoup.parse(inputStream.readUTF());
+    }
+
+    private void writeObject(ObjectOutputStream outputStream) throws IOException {
+        outputStream.writeUTF(BASE_URL);
+        outputStream.writeObject(cookies);
+        outputStream.writeUTF(workingDocument.html());
     }
 
 }

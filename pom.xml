@@ -13,6 +13,7 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+                <version>3.1</version>
             </plugin>
         </plugins>
     </build>
@@ -28,5 +29,6 @@
             <artifactId>jsoup</artifactId>
             <version>1.13.1</version>
         </dependency>
+
     </dependencies>
 </project>
