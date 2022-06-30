@@ -173,7 +173,7 @@ public class SAEScraper implements Serializable {
         if (workingDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
-        String scheduleUrl = workingDocument.selectFirst("#ctl00_subMenun10 > td > table > tbody > tr > td > a")
+        String scheduleUrl = workingDocument.selectFirst("td > table > tbody > tr > td > a:contains(Horario)")
                 .absUrl("href");
         Connection connection = Jsoup.connect(scheduleUrl).cookies(cookies)
                 .method(Connection.Method.GET).userAgent(USER_AGENT);
@@ -187,16 +187,16 @@ public class SAEScraper implements Serializable {
         for (Element classRow : scheduleTable) {
             schedule.add( new ScheduleClass(
                     classRow.selectFirst("td:nth-child(1)").text(),  // grupo
-                    classRow.selectFirst("td:nth-child(3)").text(),  // materia
-                    classRow.selectFirst("td:nth-child(4)").text(),  // profesor
-                    classRow.selectFirst("td:nth-child(5)").text(),  // edificio
-                    classRow.selectFirst("td:nth-child(6)").text(),  // salon
+                    classRow.selectFirst("td:nth-child(2)").text(),  // materia
+                    classRow.selectFirst("td:nth-child(3)").text(),  // profesor
+                    "",  // edificio  - actualizacion ya no se muestra esta informacion en la pagina
+                    "",  // salon - actualizacion ya no se muestra esta informacion en la pagina
                     new String[]{
-                            classRow.selectFirst("td:nth-child(7)").text(), // Lunes
-                            classRow.selectFirst("td:nth-child(8)").text(), // Martes
-                            classRow.selectFirst("td:nth-child(9)").text(), // Miércoles
-                            classRow.selectFirst("td:nth-child(10)").text(), // Jueves
-                            classRow.selectFirst("td:nth-child(11)").text(), // Viernes
+                            classRow.selectFirst("td:nth-child(4)").text(), // Lunes
+                            classRow.selectFirst("td:nth-child(5)").text(), // Martes
+                            classRow.selectFirst("td:nth-child(6)").text(), // Miércoles
+                            classRow.selectFirst("td:nth-child(7)").text(), // Jueves
+                            classRow.selectFirst("td:nth-child(8)").text(), // Viernes
                     }  // horario
             ));
         }
@@ -214,8 +214,9 @@ public class SAEScraper implements Serializable {
         if (workingDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
-        String kardexUrl = workingDocument
-                .selectFirst("#ctl00_subMenun5 > td > table > tbody > tr > td > a").absUrl("href");
+        String kardexUrl = workingDocument.selectFirst("table > tbody > tr > td > a:contains(Kárdex)")
+                .absUrl("href");
+
 
         Connection connection = Jsoup.connect(kardexUrl).cookies(cookies)
                 .method(Connection.Method.GET).userAgent(USER_AGENT);
@@ -245,8 +246,9 @@ public class SAEScraper implements Serializable {
         if (workingDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
-        String kardexUrl = workingDocument.selectFirst("#ctl00_subMenun5 > td > table > tbody > tr > td > a")
+        String kardexUrl = workingDocument.selectFirst("table > tbody > tr > td > a:contains(Kárdex)")
                 .absUrl("href");
+
 
         Connection connection = Jsoup.connect(kardexUrl).cookies(cookies)
                 .method(Connection.Method.GET).userAgent(USER_AGENT);
@@ -292,7 +294,7 @@ public class SAEScraper implements Serializable {
         if (workingDocument == null)
             throw new IllegalStateException(NULL_DOCUMENT_MESSAGE);
 
-        String gradesUrl = workingDocument.selectFirst("#ctl00_subMenun11 > td > table > tbody > tr > td > a")
+        String gradesUrl = workingDocument.selectFirst("table > tbody > tr > td > a:contains(Calificaciones)")
                 .absUrl("href");
 
         Connection connection = Jsoup.connect(gradesUrl).cookies(cookies)
