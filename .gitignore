@@ -2,3 +2,5 @@
 SAEScraper.iml
 out
 target
+credentials.properties
+src/test/resources/credentials.properties
