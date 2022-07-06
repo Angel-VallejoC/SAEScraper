@@ -59,21 +59,31 @@ public class SAEScraper implements Serializable {
 
     /**
      * Recarga el documento de trabajo con las cookies almacenadas
+     * @param timeoutSeconds La cantidad de segundos a esperar al realizar la peticion
      * @throws IOException Si existe un error en la conexión
      * @throws SessionExpiredException Si la sesión expiró
      */
-    public void reload() throws IOException, SessionExpiredException {
+    public void reload(int timeoutSeconds) throws IOException, SessionExpiredException {
         // mainUrl, available for logged in users
         String mainUrl = BASE_URL + "alumnos/default.aspx";
         Connection connection = Jsoup.connect(mainUrl)
                 .cookies(cookies)
                 .method(Connection.Method.GET)
                 .userAgent(USER_AGENT)
-                .timeout(10 * 1000);
+                .timeout(timeoutSeconds * 1000);
         Connection.Response response = connection.execute();
         workingDocument = response.parse();
 
         checkSessionState(mainUrl, response.url().toString());
+    }
+
+    /**
+     * Recarga el documento de trabajo con las cookies almacenadas
+     * @throws IOException Si existe un error en la conexión
+     * @throws SessionExpiredException Si la sesión expiró
+     */
+    public void reload() throws IOException, SessionExpiredException {
+        reload(15);
     }
 
     /**
