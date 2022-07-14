@@ -211,6 +211,15 @@ public class SAEScraper implements Serializable {
             ));
         }
 
+        if (schedule.size() == 1){
+            ScheduleClass scheduleEntry = schedule.get(0);
+            String[] classSchedule = scheduleEntry.getSchedule();
+
+            if (scheduleEntry.getName().trim().replace("-" , "").equals("") && classSchedule[0].equals("") &&
+                    classSchedule[1].equals("") &&classSchedule[2].equals("") &&classSchedule[3].equals("") &&classSchedule[4].equals("") )
+                schedule = new ArrayList<>();
+        }
+
         return schedule;
     }
 
